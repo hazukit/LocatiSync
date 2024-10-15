@@ -38,7 +38,7 @@ const LoginScreen = () => {
       if (email && email.endsWith('@gmail.com')) {
         const isInvited = await checkIfInvited(email);
         if (isInvited) {
-          Alert.alert('ログイン成功', `ようこそ ${email}`);
+          navigation.replace('Nickname');
         } else {
           Alert.alert('エラー', 'このアカウントは招待されていません');
           auth().signOut();
