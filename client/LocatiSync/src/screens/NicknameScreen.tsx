@@ -1,13 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Alert, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { useNavigation } from '@react-navigation/native';
+import { getNickname } from '../firebaseUtils';
 
 const NicknameScreen = () => {
   const [nickname, setNickname] = useState('');
   const [isSaving, setIsSaving] = useState(false); // 保存中かどうかの状態
+  const navigation = useNavigation();
 
-  // Firestore にニックネームを保存する関数
+  // ユーザーのニックネームをチェック
+  useEffect(() => {
+    const fetchNickname = async () => {
+      try {
+        const nickname = await getNickname();
+        if (nickname) {
+          setNickname(nickname);
+        }
+      } catch (error) {
+        console.error('ニックネーム取得エラー:', error);
+      }
+    };
+
+    fetchNickname(); // 非同期関数を呼び出す
+  }, []);
+
+  // Firestore にニックネームを保存・更新する関数
   const saveNickname = async () => {
     if (nickname.trim() === '') {  // ニックネームが空の時はエラー
       Alert.alert('エラー', 'ニックネームを入力してください');
@@ -24,7 +43,7 @@ const NicknameScreen = () => {
             nickname: nickname,
             email: user.email,
           });
-        Alert.alert('成功', 'ニックネームが保存されました');
+        navigation.replace('MainStack');
       } else {
         Alert.alert('エラー', 'ログインされていません');
       }
@@ -38,7 +57,7 @@ const NicknameScreen = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>ニックネームの入力</Text>
+      <Text style={styles.title}>{nickname ? 'ニックネームの変更' : 'ニックネームの入力'}</Text>
       <TextInput
         style={styles.input}
         placeholder="ニックネーム"

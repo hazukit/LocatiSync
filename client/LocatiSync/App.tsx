@@ -4,29 +4,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './src/screens/LoginScreen';
 import NicknameScreen from './src/screens/NicknameScreen';
+import MainScreen from './src/screens/MainScreen';
+import AppNavigator from './src/AppNavigator';
 
 const Stack = createStackNavigator();
-console.log("Start App...");
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#255987',
-          },
-          headerTintColor: '#fff',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            headerTitleAlign: 'center',
-          },
-        }}
-      >
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Nickname" component={NicknameScreen} />
-      </Stack.Navigator>
+      <AppNavigator />
     </NavigationContainer>
   );
 };
-
 export default App;

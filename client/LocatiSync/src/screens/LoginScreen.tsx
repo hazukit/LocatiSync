@@ -5,10 +5,38 @@ import { GOOGLE_WEB_CLIENT_ID } from '@env';
 import auth from '@react-native-firebase/auth';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import { getNickname } from '../firebaseUtils';
 
 const LoginScreen = () => {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const navigation = useNavigation();
+
+  // ユーザーのログイン状態とニックネームを確認して適切な画面に遷移
+  const checkLoginAndNavigate = async () => {
+    const user = auth().currentUser;
+    if (user) {
+      const nickname = await getNickname();
+      if (nickname) {
+        navigation.replace('MainStack');
+      } else {
+        navigation.replace('Nickname');
+      }
+    }
+  };
+  
+  // ログイン状態を確認する処理
+  const checkUserLoggedIn = async (delayBeforeNavigation) => {
+    const user = auth().currentUser;
+    if (user) {
+      setIsLoggingIn(true);
+      //  ちょっと待ってから遷移したい
+      const timer = setTimeout(async () => {
+        await checkLoginAndNavigate();
+      }, delayBeforeNavigation);
+      // クリーンアップ関数（コンポーネントがアンマウントされた時にタイマーをクリア）
+      return () => clearTimeout(timer);
+    }
+  };
 
   // Google SignIn の初期設定
   useEffect(() => {
@@ -16,6 +44,7 @@ const LoginScreen = () => {
       webClientId: GOOGLE_WEB_CLIENT_ID,
       scopes: ['email'],
     });
+    checkUserLoggedIn(1000);
   }, []);
 
   // Google OAuth ログイン
@@ -38,7 +67,7 @@ const LoginScreen = () => {
       if (email && email.endsWith('@gmail.com')) {
         const isInvited = await checkIfInvited(email);
         if (isInvited) {
-          navigation.replace('Nickname');
+          checkLoginAndNavigate(0);
         } else {
           Alert.alert('エラー', 'このアカウントは招待されていません');
           auth().signOut();
